@@ -1,0 +1,18 @@
+run in main directory terminal: pip install torch torchvision torchaudio nltk scikit-learn numpy
+
+torch: PyTorch library for deep learning.
+torchvision & torchaudio: 
+nltk: For natural language processing.
+scikit-learn: For data preprocessing and ML utilities.
+numpy: For numerical computations.
+
+BASIC PLAN FOR PROJECT: 
+
+1. PREPROCESS THE DATA (preprocess.py) - remove stopwords, tokenize words, convert uppercase text to lower, and vectorize the text (TfidVectorizer)
+    output = A numerical matrix representing words in the text
+
+2. BUILD THE NEURAL NETWORK (model.py) - Using PyTorch, we need to create a model with: An input layer that accepts TF-IDF features (idk what TF-IDF is yet), a hidden layer with ReLU activiation (idk what RELU is)
+                            - An output layer with 3 neurons, postive, neutral, and negative
+
+3. TRAIN THE MODEL  (train.py) - Train the neural network using the labeled text data, this means we are going to need to get a dataset, then convert the text into tensors. Then split into training and validation sets
+                               - The training loop could look something like: Forward pass -> Compute loss -> Backpropagation -> Update weights. Print the loss after each epoch 

@@ -24,6 +24,8 @@ def preprocess_text(text):
 #we do this using the TfidVectorizer or Term Frequency-inverse Document Frequency, which converts text into numbers based on how important each word is in the dataset
 #There are two steps to this, term frequency or TF, which counts how often a word appears in a sentance
 #And Inverse Document Frequency, which reduces the importance of common words by dividing their frequency accross all texts
+
+#The values in the vector will represent the IMPORTANCE of a word relative to the corpus
 def vectorize_texts(texts):
     vectorizer = TfidfVectorizer(max_features=100) #Only keep the 100 most important words
     X = vectorizer.fit_transform(texts).toarray(), vectorizer

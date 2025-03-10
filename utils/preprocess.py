@@ -1,7 +1,7 @@
 #Text preprocessing and vectorization
 #nltk is natural language ToolKit, we will use this for text processing
 import nltk
-
+import torch
 from nltk.tokenize import word_tokenize
 #get the tokenize lib. This is how we will be splitting the sentances in our dataset
 from nltk.corpus import stopwords
@@ -26,10 +26,23 @@ def preprocess_text(text):
 #And Inverse Document Frequency, which reduces the importance of common words by dividing their frequency accross all texts
 
 #The values in the vector will represent the IMPORTANCE of a word relative to the corpus
+#We will also be converting our vectorized text to tensors. This is an ESSENTIAL STEP (maybe elaborate on this more)
 def vectorize_texts(texts):
     vectorizer = TfidfVectorizer(max_features=100) #Only keep the 100 most important words
-    X = vectorizer.fit_transform(texts).toarray(), vectorizer
+
+    X = vectorizer.fit_transform(texts).toarray()
+
     return X, vectorizer
+
+
+
+
+
+
+
+
+
+
 
 
 #run some tests to ensure that this func works

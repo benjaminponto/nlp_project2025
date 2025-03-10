@@ -10,7 +10,7 @@ class SentimentClassifier(nn.Module):
 
         self.fc1 = nn.Linear(input_size, hidden_size) #first layer, connects all the input features to the hidden layer.
 
-        self.relu = nn.ReLU() # hidden layer, adds non-linearity, we need this because this allows us to model non-linear relationships. this sort of acts like a sigmoid function 
+        self.relu = nn.ReLU() # hidden layer, adds non-linearity with the ReLU function
 
         self.fc2 = nn.Linear(hidden_size, output_size) # second layer, takes hidden layers output and produces the final output
 
@@ -23,14 +23,14 @@ class SentimentClassifier(nn.Module):
 
 
 
-
+#STEP 2: Intialize model, create the loss function, and create the optimizer
 def initialize_model(input_size, hidden_size, output_size):
-    model = SentimentAnalyzer(input_size, hidden_size, output_size)
+    model = SentimentClassifier(input_size, hidden_size, output_size)
 
     loss_fn = nn.CrossEntropyLoss() # calculates the difference between the predicted class probabilities and the actual class labels. I.E shows how  good our model is.
 
     #Adaptive Moment Estimation (ADAM), does a bunch of cool math that adjusts how much our models weights are adjusted during each interation
-    #Our lr (learning rate) is set to the default value of 0.001. Chaning this will affect the rate at which our weights are adjusted
+    #Our lr (learning rate) is set to the default value of 0.001. Changing this will affect the rate at which our weights are adjusted
     #The lr will NEED to be changed and tested with to find the most effective value.
     optimizer = optim.Adam(model.parameters(), lr=0.001) 
 
@@ -44,14 +44,20 @@ def train_model(model, loss_fn, optimizer, train_loader, num_epochs=5):
         
         for inputs, labels in train_loader:
             
-            #Zeros the gradients before we backpropagate. if we dont,  PyTorch will accumulate the gradients on each pass
+            #Zeros the gradients before we backpropagate. if we dont,  PyTorch will accumulate the gradients on each pass, which can disrupt the values
             optimizer.zero_grad()
 
-            #forward pass
-            outputs = model(inputs)
+           
+            outputs = model(inputs) #forward pass
 
-            loss = loss_fn(outputs, labels)
-            loss.backward()
-            optimizer.step()
+            loss = loss_fn(outputs, labels) #Compute loss
+            loss.backward() #backpropogate
+            optimizer.step() # update the weights
+
+            running_loss += loss.item() #Accumulate loss
+
+        print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss / len(train_loader)}")
+        
+    return model
 
                                                    

@@ -10,14 +10,14 @@ class SentimentClassifier(nn.Module):
 
         self.fc1 = nn.Linear(input_size, hidden_size) #first layer, connects all the input features to the hidden layer.
 
-        self.relu = nn.ReLU() # hidden layer, adds non-linearity with the ReLU function
+        self.relu = nn.ReLU() # hidden layer, adds non-linearity with the ReLU activation function. This allows the model to learn complex patterns in the data. 
 
         self.fc2 = nn.Linear(hidden_size, output_size) # second layer, takes hidden layers output and produces the final output
 
     def forward(self, x):
         x = self.fc1(x) # pass input through first layer
         x = self.relu(x) # ReLU with hidden layer
-        x = self.fc2(x) #pass through second layer, this gets output
+        x = self.fc2(x) #pass through last layer which in the next epoch, will be the first layers input
 
         return x
 
@@ -27,7 +27,8 @@ class SentimentClassifier(nn.Module):
 def initialize_model(input_size, hidden_size, output_size):
     model = SentimentClassifier(input_size, hidden_size, output_size)
 
-    loss_fn = nn.CrossEntropyLoss() # calculates the difference between the predicted class probabilities and the actual class labels. I.E shows how  good our model is.
+    loss_fn = nn.CrossEntropyLoss() # calculates the difference between the predicted class probabilities and the actual class labels. it shows how  good our model is.
+    #still dont fully understand this 
 
     #Adaptive Moment Estimation (ADAM), does a bunch of cool math that adjusts how much our models weights are adjusted during each interation
     #Our lr (learning rate) is set to the default value of 0.001. Changing this will affect the rate at which our weights are adjusted

@@ -7,12 +7,12 @@ from utils.predict import predict_sentiment
 
 # create a sample dataset with 
 sample_texts = [
-    "I love this product! It's amazing!", 
-    "This is the worst thing I've ever bought...", 
+    "I love this product! It's amazing!",
+    "This is the worst thing I've ever bought...",
     "It's okay, not the best, but not the worst!",
-   
-
-    
+    "Totally exceeded my expectations!",
+    "Meh, I've seen better.",
+    "Absolutely awful. Never buying again."
 ]
 
 with open("vectorizer.pkl", "rb") as f:
@@ -27,7 +27,7 @@ X, vectorizer = vectorize_texts(processed_texts)
 
 # now we have to turn out vectors into tensors
 X_train = torch.tensor(X, dtype=torch.float32)  # Feature Tensor
-y_train = torch.tensor([0, 1, 2], dtype=torch.long)  # Labels (0 = Positive, 1 = Negative, 2 = Neutral)
+y_train = torch.tensor([i % 3 for i in range(len(sample_texts))], dtype=torch.long) # Labels (0 = Positive, 1 = Negative, 2 = Neutral)
 
 # load the data? not sure why come back to this later
 print("X_train shape:", X_train.shape)

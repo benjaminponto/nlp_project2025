@@ -15,7 +15,7 @@ def load_model(model_path, input_size, hidden_size, output_size):
 
 def prepare_input(text, vectorizer):
     # Preprocess the text
-    processed_text = preprocess_text(text)
+    processed_text = preprocess_text(text) #<---- another issue here
     
     # Vectorize the text using the same vectorizer used during training
     vectorized_text = vectorizer.transform([processed_text]).toarray()
@@ -26,13 +26,13 @@ def prepare_input(text, vectorizer):
     return input_tensor
 
 def predict_sentiment(model, text, vectorizer):
-    input_tensor = prepare_input(text, vectorizer)
+    input_tensor = prepare_input(text, vectorizer) # <--- issue here
     
     with torch.no_grad():
         output = model(input_tensor)
         probabilities = F.softmax(output, dim=1)  # Convert logits to probabilities
         predicted_class = torch.argmax(probabilities, dim=1).item()  # Get the predicted class index
 
-    labels = ["Positive", "Neutral", "Negative"]
+    labels = ["Positive", "Negative", "Neutral"]  # Define your class labels
     return labels[predicted_class], probabilities[0][predicted_class].item()  # Return class label and confidence score
     

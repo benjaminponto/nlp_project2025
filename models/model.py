@@ -38,7 +38,7 @@ def initialize_model(input_size, hidden_size, output_size):
     return model, loss_fn, optimizer
 
 #recall, an epoch is a pass of the entire training dataset through our algorithm
-def train_model(model, loss_fn, optimizer, train_loader, num_epochs=5):
+def train_model(model, loss_fn, optimizer, train_loader, num_epochs=25):
     model.train()
     for epoch in range(num_epochs):
         running_loss = 0.0

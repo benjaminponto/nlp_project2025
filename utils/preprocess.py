@@ -1,17 +1,109 @@
-#Text preprocessing and vectorization
-#nltk is natural language ToolKit, we will use this for text processing
-import nltk
-import torch
-from nltk.tokenize import word_tokenize
-#get the tokenize lib. This is how we will be splitting the sentances in our dataset
-from nltk.corpus import stopwords
-#stopwords are common words like "the", "is" that dont carry much meaning
+from datasets import load_dataset
+import os
+import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
-#TfidfVectoizer converts text into numerical features
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
 
-nltk.download("stopwords")
+# if you haven’t already downloaded the punkt models, run this once:
+nltk.download('punkt')
+nltk.download('stopwords')
+def load_imdb_dataset():
+    """
+    Load the IMDB train/test splits from Hugging Face Datasets.
+    Returns:
+      train_texts, train_labels, test_texts, test_labels
+    """
+    ds = load_dataset("imdb")
+    train_texts = ds["train"]["text"]
+    train_labels = ds["train"]["label"]
+    test_texts  = ds["test"]["text"]
+    test_labels = ds["test"]["label"]
+    return train_texts, train_labels, test_texts, test_labels
 
-nltk.download('punkt_tab') #the punkt model didves a text into a list of sentances 
+# ─── Preprocessing ────────────────────────────────────────────────────────────
+def preprocess_text(text: str) -> str:
+    
+    #Clean a raw text string: lowercasing, removing HTML, URLs, unwanted chars.
+    #Extend this with your existing tokenization, stopword removal, etc.
+    
+    import re
+    # lowercase
+    text = text.lower()
+    # remove HTML tags
+    text = re.sub(r'<.*?>', ' ', text)
+    # remove URLs
+    text = re.sub(r'http\S+|www\.\S+', ' ', text)
+    # remove non-word characters (keep basic punctuation)
+    text = re.sub(r'[^\w\s\.!?]', ' ', text)
+    # collapse whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+def preprocess_texts(texts: list[str]) -> list[str]:
+    """
+    Apply preprocess_text to a list of raw strings.
+    """
+    return [preprocess_text(t) for t in texts]
+
+# ─── Vectorization ────────────────────────────────────────────────────────────
+
+def vectorize_texts(processed_texts: list[str], vectorizer_path: str = None):
+    #Args:
+      #processed_texts: list of cleaned text strings.
+      #vectorizer_path: path to load/save a pickle of TfidfVectorizer.
+    #Returns:
+      #X: numpy array of shape (n_samples, n_features)
+      #vectorizer: fitted TfidfVectorizer
+    
+    if vectorizer_path and os.path.exists(vectorizer_path):
+        with open(vectorizer_path, 'rb') as f:
+            vectorizer = pickle.load(f)
+        X = vectorizer.transform(processed_texts)
+    else:
+        vectorizer = TfidfVectorizer(
+            max_features=20000,
+            ngram_range=(1,2),
+            smooth_idf=True,
+            lowercase=False  # already lowercased in preprocess_text
+        )
+        X = vectorizer.fit_transform(processed_texts)
+        if vectorizer_path:
+            with open(vectorizer_path, 'wb') as f:
+                pickle.dump(vectorizer, f)
+    return X.toarray(), vectorizer
+
+
+def load_and_preprocess_imdb(vectorizer_path: str = None):
+   
+
+    #Args:
+      #vectorizer_path: optional path for saving/loading the vectorizer.
+    #Returns:
+     # X_train, y_train, X_test, y_test, vectorizer
+
+    train_texts, train_labels, test_texts, test_labels = load_imdb_dataset()
+    processed_train = preprocess_texts(train_texts)
+    processed_test  = preprocess_texts(test_texts)
+
+    X_train, vectorizer = vectorize_texts(processed_train)
+    X_test  = vectorizer.transform(processed_test).toarray()
+
+    # now vectorizer is in memory; if you passed a path and want to overwrite it:
+    if vectorizer_path:
+         with open(vectorizer_path, "wb") as f:
+             pickle.dump(vectorizer, f)
+
+    return X_train, train_labels, X_test, test_labels, vectorizer
+
+
+
+
+
+
+
+
 
 def preprocess_text(text):
     text = text.lower() # covert all text to lowercase

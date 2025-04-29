@@ -38,27 +38,35 @@ def initialize_model(input_size, hidden_size, output_size):
     return model, loss_fn, optimizer
 
 #recall, an epoch is a pass of the entire training dataset through our algorithm
-def train_model(model, loss_fn, optimizer, train_loader, num_epochs=25):
+def train_model(model, loss_fn, optimizer, data_loader, num_epochs=25, evaluate=False):
+    # pick up whatever device the model is on
+    device = next(model.parameters()).device
+
+    if evaluate:
+        model.eval()  # no weight updates
+        total_loss, total_correct = 0.0, 0
+        with torch.no_grad():
+            for X, y in data_loader:
+                X, y = X.to(device), y.to(device)
+                out = model(X)
+                total_loss   += loss_fn(out, y).item() * X.size(0)
+                total_correct += (out.argmax(1) == y).sum().item()
+        N = len(data_loader.dataset)
+        return total_loss / N, total_correct / N * 100
+
     model.train()
-    for epoch in range(num_epochs):
-        running_loss = 0.0
-        
-        for inputs, labels in train_loader:
-            
-            #Zeros the gradients before we backpropagate. if we dont,  PyTorch will accumulate the gradients on each pass, which can disrupt the values
+    for epoch in range(1, num_epochs+1):
+        epoch_loss = 0.0
+        for X, y in data_loader:
+            X, y = X.to(device), y.to(device)  # send batch to device
             optimizer.zero_grad()
+            loss = loss_fn(model(X), y)
+            loss.backward()
+            optimizer.step()
+            epoch_loss += loss.item()
+        print(f"Epoch {epoch}/{num_epochs}, Loss: {epoch_loss/len(data_loader):.4f}")
 
-           
-            outputs = model(inputs) #forward pass
-
-            loss = loss_fn(outputs, labels) #Compute loss
-            loss.backward() #backpropogate
-            optimizer.step() # update the weights
-
-            running_loss += loss.item() #Accumulate loss
-
-        print(f"Epoch {epoch+1}/{num_epochs}, Loss: {running_loss / len(train_loader)}")
-        
     return model
+
 
                                                    

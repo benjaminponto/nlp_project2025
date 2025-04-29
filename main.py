@@ -26,19 +26,56 @@ input_size  = X_train.shape[1]  # number of TF-IDF features
 hidden_size = 128
 output_size = 2  # IMDB: positive vs. negative
 model, loss_fn, optimizer = initialize_model(input_size, hidden_size, output_size)
-train_model(model, loss_fn, optimizer, train_loader, num_epochs=25)
+
+# Track training loss
+import matplotlib.pyplot as plt
+all_losses = []
+num_epochs = 25
+
+for epoch in range(num_epochs):
+    model.train()
+    total_loss = 0
+    for X, y in train_loader:
+        optimizer.zero_grad()
+        outputs = model(X)
+        loss = loss_fn(outputs, y)
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+    avg_loss = total_loss / len(train_loader)
+    all_losses.append(avg_loss)
+    print(f"Epoch {epoch+1}/{num_epochs}, Loss: {avg_loss:.4f}")
+
+# Save the loss curve
+plt.figure(figsize=(8, 6))
+plt.plot(all_losses, marker='o')
+plt.title('Training Loss Curve')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("loss_curve.png")
+print("Saved training curve as 'loss_curve.png'")
 
 # 5) Evaluate on the test split
 model.eval()
-test_loss, test_acc = train_model(
-    model, loss_fn, optimizer,
-    test_loader,
-    evaluate=True
-)
-print(f"Test loss: {test_loss:.3f} | acc: {test_acc:.2f}%")
+total_loss = 0
+correct = 0
+total = 0
+with torch.no_grad():
+    for X, y in test_loader:
+        outputs = model(X)
+        loss = loss_fn(outputs, y)
+        total_loss += loss.item()
+        preds = torch.argmax(outputs, dim=1)
+        correct += (preds == y).sum().item()
+        total += y.size(0)
+
+avg_test_loss = total_loss / len(test_loader)
+test_accuracy = 100 * correct / total
+print(f"Test loss: {avg_test_loss:.3f} | acc: {test_accuracy:.2f}%")
 
 # 6) Save the trained model and vectorizer
 torch.save(model.state_dict(), "saved_model.pth")
 with open("vectorizer.pkl", "wb") as f:
     pickle.dump(vectorizer, f)
-

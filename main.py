@@ -59,6 +59,11 @@ with torch.no_grad():
 # 7) Display class distributions
 print("Predicted distribution:", Counter(all_preds))
 print("True label distribution:   ", Counter(all_labels))
+# 7) Compute and display accuracy
+correct = sum(p == a for p, a in zip(all_preds, all_labels))
+total = len(all_labels)
+accuracy = correct / total * 100
+print(f"Accuracy: {accuracy:.2f}%")
 
 # 8) Save the trained model and vectorizer
 torch.save(model.state_dict(), "saved_model.pth")
